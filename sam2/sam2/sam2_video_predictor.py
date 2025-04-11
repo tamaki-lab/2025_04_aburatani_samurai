@@ -507,13 +507,13 @@ class SAM2VideoPredictor(SAM2Base):
                             inference_state, frame_idx
                         )
                     # fill object pointer with a dummy pointer (based on an empty mask)
-                    consolidated_out["obj_ptr"][obj_idx : obj_idx + 1] = empty_mask_ptr
+                    consolidated_out["obj_ptr"][obj_idx: obj_idx + 1] = empty_mask_ptr
                 continue
             # Add the temporary object output mask to consolidated output mask
             obj_mask = out["pred_masks"]
             consolidated_pred_masks = consolidated_out[consolidated_mask_key]
             if obj_mask.shape[-2:] == consolidated_pred_masks.shape[-2:]:
-                consolidated_pred_masks[obj_idx : obj_idx + 1] = obj_mask
+                consolidated_pred_masks[obj_idx: obj_idx + 1] = obj_mask
             else:
                 # Resize first if temporary object mask has a different resolution
                 resized_obj_mask = torch.nn.functional.interpolate(
@@ -522,9 +522,9 @@ class SAM2VideoPredictor(SAM2Base):
                     mode="bilinear",
                     align_corners=False,
                 )
-                consolidated_pred_masks[obj_idx : obj_idx + 1] = resized_obj_mask
-            consolidated_out["obj_ptr"][obj_idx : obj_idx + 1] = out["obj_ptr"]
-            consolidated_out["object_score_logits"][obj_idx : obj_idx + 1] = out[
+                consolidated_pred_masks[obj_idx: obj_idx + 1] = resized_obj_mask
+            consolidated_out["obj_ptr"][obj_idx: obj_idx + 1] = out["obj_ptr"]
+            consolidated_out["object_score_logits"][obj_idx: obj_idx + 1] = out[
                 "object_score_logits"
             ]
 
@@ -955,7 +955,7 @@ class SAM2VideoPredictor(SAM2Base):
         if maskmem_features is not None:
             maskmem_features = maskmem_features.to(torch.bfloat16)
             maskmem_features = maskmem_features.to(storage_device, non_blocking=True)
-        pred_masks_gpu = current_out["pred_masks"] # (B, 1, H, W)
+        pred_masks_gpu = current_out["pred_masks"]  # (B, 1, H, W)
         # potentially fill holes in the predicted masks
         if self.fill_hole_area > 0:
             pred_masks_gpu = fill_holes_in_mask_scores(
@@ -971,8 +971,8 @@ class SAM2VideoPredictor(SAM2Base):
         best_kf_score = current_out["kf_ious"]
         # make a compact version of this frame's output to reduce the state size
         compact_current_out = {
-            "maskmem_features": maskmem_features, # (B, C, H, W)
-            "maskmem_pos_enc": maskmem_pos_enc, 
+            "maskmem_features": maskmem_features,  # (B, C, H, W)
+            "maskmem_pos_enc": maskmem_pos_enc,
             "pred_masks": pred_masks,
             "obj_ptr": obj_ptr,
             "object_score_logits": object_score_logits,

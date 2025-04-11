@@ -36,10 +36,13 @@ class SAM2Base(torch.nn.Module):
         sigmoid_bias_for_mem_enc=0.0,  # bias factor for mask sigmoid prob
         # During evaluation, whether to binarize the sigmoid mask logits on interacted frames with clicks
         binarize_mask_from_pts_for_mem_enc=False,
-        use_mask_input_as_output_without_sam=False,  # on frames with mask input, whether to directly output the input mask without using a SAM prompt encoder + mask decoder
-        # The maximum number of conditioning frames to participate in the memory attention (-1 means no limit; if there are more conditioning frames than this limit,
-        # we only cross-attend to the temporally closest `max_cond_frames_in_attn` conditioning frames in the encoder when tracking each frame). This gives the model
-        # a temporal locality when handling a large number of annotated frames (since closer frames should be more important) and also avoids GPU OOM.
+        use_mask_input_as_output_without_sam=False,
+        # on frames with mask input, whether to directly output the input mask without using a SAM prompt encoder + mask decoder
+        # The maximum number of conditioning frames to participate in the memory attention
+        # (-1 means no limit; if there are more conditioning frames than this limit,
+        # we only cross-attend to the temporally closest `max_cond_frames_in_attn` conditioning frames in the encoder when tracking each frame).
+        # This gives the model a temporal locality when handling a large number of annotated frames
+        # (since closer frames should be more important) and also avoids GPU OOM.
         max_cond_frames_in_attn=-1,
         # on the first frame, whether to directly add the no-memory embedding to the image feature
         # (instead of using the transformer encoder)
@@ -52,7 +55,8 @@ class SAM2Base(torch.nn.Module):
         # default is 1 for both, meaning that only the first click gives multimask output; also note that a box counts as two points)
         multimask_min_pt_num=1,
         multimask_max_pt_num=1,
-        # whether to also use multimask output for tracking (not just for the first click on initial conditioning frames; only relevant when `multimask_output_in_sam=True`)
+        # whether to also use multimask output for tracking
+        # (not just for the first click on initial conditioning frames; only relevant when `multimask_output_in_sam=True`)
         multimask_output_for_tracking=False,
         # Whether to use multimask tokens for obj ptr; Only relevant when both
         # use_obj_ptrs_in_encoder=True and multimask_output_for_tracking=True
@@ -205,8 +209,8 @@ class SAM2Base(torch.nn.Module):
         self.stable_frames = 0
 
         # Debug purpose
-        self.history = {} # debug
-        self.frame_cnt = 0 # debug
+        self.history = {}  # debug
+        self.frame_cnt = 0  # debug
 
         # Hyperparameters for SAMURAI
         self.stable_frames_threshold = stable_frames_threshold
@@ -495,7 +499,8 @@ class SAM2Base(torch.nn.Module):
                 if ious[0][best_iou_inds] < self.stable_ious_threshold:
                     self.stable_frames = 0
                 else:
-                    self.kf_mean, self.kf_covariance = self.kf.update(self.kf_mean, self.kf_covariance, self.kf.xyxy_to_xyah(high_res_multibboxes[best_iou_inds]))
+                    self.kf_mean, self.kf_covariance = self.kf.update(
+                        self.kf_mean, self.kf_covariance, self.kf.xyxy_to_xyah(high_res_multibboxes[best_iou_inds]))
         elif multimask_output and not self.samurai_mode:
             # take the best mask prediction (with the highest IoU estimation)
             best_iou_inds = torch.argmax(ious, dim=-1)
@@ -607,8 +612,8 @@ class SAM2Base(torch.nn.Module):
         assert len(backbone_out["backbone_fpn"]) == len(backbone_out["vision_pos_enc"])
         assert len(backbone_out["backbone_fpn"]) >= self.num_feature_levels
 
-        feature_maps = backbone_out["backbone_fpn"][-self.num_feature_levels :]
-        vision_pos_embeds = backbone_out["vision_pos_enc"][-self.num_feature_levels :]
+        feature_maps = backbone_out["backbone_fpn"][-self.num_feature_levels:]
+        vision_pos_embeds = backbone_out["vision_pos_enc"][-self.num_feature_levels:]
 
         feat_sizes = [(x.shape[-2], x.shape[-1]) for x in vision_pos_embeds]
         # flatten NxCxHxW to HWxNxC
@@ -661,21 +666,22 @@ class SAM2Base(torch.nn.Module):
             stride = 1 if self.training else self.memory_temporal_stride_for_eval
 
             if self.samurai_mode:
-                valid_indices = [] 
+                valid_indices = []
                 if frame_idx > 1:  # Ensure we have previous frames to evaluate
                     for i in range(frame_idx - 1, 1, -1):  # Iterate backwards through previous frames
                         iou_score = output_dict["non_cond_frame_outputs"][i]["best_iou_score"]  # Get mask affinity score
                         obj_score = output_dict["non_cond_frame_outputs"][i]["object_score_logits"]  # Get object score
-                        kf_score = output_dict["non_cond_frame_outputs"][i]["kf_score"] if "kf_score" in output_dict["non_cond_frame_outputs"][i] else None  # Get motion score if available
+                        kf_score = output_dict["non_cond_frame_outputs"][i]["kf_score"] if "kf_score" in output_dict["non_cond_frame_outputs"][i] else None
+                        # Get motion score if available
                         # Check if the scores meet the criteria for being a valid index
                         if iou_score.item() > self.memory_bank_iou_threshold and \
                            obj_score.item() > self.memory_bank_obj_score_threshold and \
                            (kf_score is None or kf_score.item() > self.memory_bank_kf_score_threshold):
-                            valid_indices.insert(0, i)  
+                            valid_indices.insert(0, i)
                         # Check the number of valid indices
-                        if len(valid_indices) >= self.max_obj_ptrs_in_encoder - 1:  
+                        if len(valid_indices) >= self.max_obj_ptrs_in_encoder - 1:
                             break
-                if frame_idx - 1 not in valid_indices: 
+                if frame_idx - 1 not in valid_indices:
                     valid_indices.append(frame_idx - 1)
                 for t_pos in range(1, self.num_maskmem):  # Iterate over the number of mask memories
                     idx = t_pos - self.num_maskmem  # Calculate the index for valid indices
