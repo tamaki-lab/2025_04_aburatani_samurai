@@ -3,25 +3,26 @@ import gc
 import numpy as np
 import os
 import os.path as osp
-import pdb
+# import pdb
 import torch
-from sam2.build_sam import build_sam2_video_predictor
-from tqdm import tqdm
+from sam2.sam2.build_sam import build_sam2_video_predictor
+# from tqdm import tqdm
 
 
 def load_lasot_gt(gt_path):
     with open(gt_path, 'r') as f:
         gt = f.readlines()
-    
+
     # bbox in first frame are prompts
     prompts = {}
     fid = 0
     for line in gt:
         x, y, w, h = map(int, line.split(','))
-        prompts[fid] = ((x, y, x+w, y+h), 0)
+        prompts[fid] = ((x, y, x + w, y + h), 0)
         fid += 1
 
     return prompts
+
 
 color = [
     (255, 0, 0),
@@ -40,7 +41,7 @@ if model_name == "base_plus":
 else:
     model_cfg = f"configs/samurai/sam2.1_hiera_{model_name[0]}.yaml"
 
-video_folder= "data/LaSOT"
+video_folder = "data/LaSOT"
 pred_folder = f"results/{exp_name}/{exp_name}_{model_name}"
 
 save_to_video = True
@@ -60,7 +61,7 @@ for vid, video in enumerate(test_videos):
 
     num_frames = len(os.listdir(osp.join(video_folder, cat_name, video.strip(), "img")))
 
-    print(f"\033[91mRunning video [{vid+1}/{len(test_videos)}]: {video} with {num_frames} frames\033[0m")
+    print(f"\033[91mRunning video [{vid + 1}/{len(test_videos)}]: {video} with {num_frames} frames\033[0m")
 
     height, width = cv2.imread(osp.join(frame_folder, "00000001.jpg")).shape[:2]
 
@@ -95,19 +96,19 @@ for vid, video in enumerate(test_videos):
                 else:
                     y_min, x_min = non_zero_indices.min(axis=0).tolist()
                     y_max, x_max = non_zero_indices.max(axis=0).tolist()
-                    bbox = [x_min, y_min, x_max-x_min, y_max-y_min]
+                    bbox = [x_min, y_min, x_max - x_min, y_max - y_min]
                 bbox_to_vis[obj_id] = bbox
                 mask_to_vis[obj_id] = mask
 
             if save_to_video:
 
-                img = cv2.imread(f'{frame_folder}/{frame_idx+1:08d}.jpg') 
+                img = cv2.imread(f'{frame_folder}/{frame_idx + 1:08d}.jpg')
                 if img is None:
                     break
                 
                 for obj_id in mask_to_vis.keys():
                     mask_img = np.zeros((height, width, 3), np.uint8)
-                    mask_img[mask_to_vis[obj_id]] = color[(obj_id+1)%len(color)]
+                    mask_img[mask_to_vis[obj_id]] = color[(obj_id + 1)%len(color)]
                     img = cv2.addWeighted(img, 1, mask_img, 0.75, 0)
                 
                 for obj_id in bbox_to_vis.keys():
@@ -117,8 +118,8 @@ for vid, video in enumerate(test_videos):
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 out.write(img)
 
-            predictions.append(bbox_to_vis)        
-        
+            predictions.append(bbox_to_vis)
+
     os.makedirs(pred_folder, exist_ok=True)
     with open(osp.join(pred_folder, f'{video_basename}.txt'), 'w') as f:
         for pred in predictions:
@@ -126,7 +127,7 @@ for vid, video in enumerate(test_videos):
             f.write(f"{x},{y},{w},{h}\n")
 
     if save_to_video:
-        out.release() 
+        out.release()
 
     del predictor
     del state
