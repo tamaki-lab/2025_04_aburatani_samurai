@@ -165,5 +165,5 @@ visualization/*
 # For Testing
 demo/
 
-.jpg
-.mp4
+*.jpg
+*.mp4
