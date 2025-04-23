@@ -5,7 +5,7 @@ import os
 import os.path as osp
 # import pdb
 import torch
-from sam2.build_sam import build_sam2_video_predictor
+from sam2.build_sam import build_sam2_video_predictor  # pylint: disable=import-error, no-name-in-module
 # from tqdm import tqdm
 
 
@@ -109,11 +109,13 @@ for vid, video in enumerate(test_videos):
 
                 for obj_id in mask_to_vis.keys():
                     mask_img = np.zeros((height, width, 3), np.uint8)
-                    mask_img[mask_to_vis[obj_id]] = color[(obj_id + 1)%len(color)]
+                    mask_img[mask_to_vis[obj_id]] = color[(obj_id + 1) % len(color)]
                     img = cv2.addWeighted(img, 1, mask_img, 0.75, 0)
 
                 for obj_id in bbox_to_vis.keys():
-                    cv2.rectangle(img, (bbox_to_vis[obj_id][0], bbox_to_vis[obj_id][1]), (bbox_to_vis[obj_id][0]+bbox_to_vis[obj_id][2], bbox_to_vis[obj_id][1]+bbox_to_vis[obj_id][3]), color[(obj_id)%len(color)], 2)
+                    cv2.rectangle(img, (bbox_to_vis[obj_id][0], bbox_to_vis[obj_id][1]),
+                                  (bbox_to_vis[obj_id][0] + bbox_to_vis[obj_id][2], bbox_to_vis[obj_id][1] + bbox_to_vis[obj_id][3]),
+                                  color[(obj_id) % len(color)], 2)
 
                 x1, y1, x2, y2 = prompts[frame_idx][0]
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
