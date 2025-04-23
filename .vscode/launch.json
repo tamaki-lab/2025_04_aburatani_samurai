@@ -14,10 +14,10 @@
             "justMyCode": false,
         },
         {
-            "name": "sam2 sample",
+            "name": "samurai sample",
             "type": "debugpy",
             "request": "launch",
-            "program": "sam2_sample.py",
+            "program": "./scripts/main_inference.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {

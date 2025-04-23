@@ -11,6 +11,7 @@ from sam2.build_sam import build_sam2_video_predictor
 
 color = [(255, 0, 0)]
 
+
 def load_txt(gt_path):
     with open(gt_path, 'r') as f:
         gt = f.readlines()
@@ -20,6 +21,7 @@ def load_txt(gt_path):
         x, y, w, h = int(x), int(y), int(w), int(h)
         prompts[fid] = ((x, y, x + w, y + h), 0)
     return prompts
+
 
 def determine_model_cfg(model_path):
     if "large" in model_path:
@@ -33,11 +35,13 @@ def determine_model_cfg(model_path):
     else:
         raise ValueError("Unknown model size in path!")
 
+
 def prepare_frames_or_path(video_path):
     if video_path.endswith(".mp4") or osp.isdir(video_path):
         return video_path
     else:
         raise ValueError("Invalid video_path format. Should be .mp4 or a directory of jpg frames.")
+
 
 def main(args):
     model_cfg = determine_model_cfg(args.model_path)
@@ -110,6 +114,7 @@ def main(args):
     gc.collect()
     torch.clear_autocast_cache()
     torch.cuda.empty_cache()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

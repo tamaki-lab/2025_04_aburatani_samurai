@@ -5,7 +5,7 @@ import os
 import os.path as osp
 # import pdb
 import torch
-from sam2.sam2.build_sam import build_sam2_video_predictor
+from sam2.build_sam import build_sam2_video_predictor
 # from tqdm import tqdm
 
 
@@ -54,8 +54,8 @@ if save_to_video:
 test_videos = sorted(test_videos)
 for vid, video in enumerate(test_videos):
 
-    cat_name = video.split('-')[0]
-    cid_name = video.split('-')[1]
+    cat_name = video.split('-')[0]  # 動画のカテゴリ名 ex) "airplane"
+    cid_name = video.split('-')[1]  # 動画のID名 ex) "1"
     video_basename = video.strip()
     frame_folder = osp.join(video_folder, cat_name, video.strip(), "img")
 
@@ -77,6 +77,7 @@ for vid, video in enumerate(test_videos):
     with torch.inference_mode(), torch.autocast("cuda", dtype=torch.float16):
         state = predictor.init_state(frame_folder, offload_video_to_cpu=True, offload_state_to_cpu=True, async_loading_frames=True)
 
+        # ground-truthの読み込み
         prompts = load_lasot_gt(osp.join(video_folder, cat_name, video.strip(), "groundtruth.txt"))
 
         bbox, track_label = prompts[0]
@@ -105,15 +106,15 @@ for vid, video in enumerate(test_videos):
                 img = cv2.imread(f'{frame_folder}/{frame_idx + 1:08d}.jpg')
                 if img is None:
                     break
-                
+
                 for obj_id in mask_to_vis.keys():
                     mask_img = np.zeros((height, width, 3), np.uint8)
                     mask_img[mask_to_vis[obj_id]] = color[(obj_id + 1)%len(color)]
                     img = cv2.addWeighted(img, 1, mask_img, 0.75, 0)
-                
+
                 for obj_id in bbox_to_vis.keys():
                     cv2.rectangle(img, (bbox_to_vis[obj_id][0], bbox_to_vis[obj_id][1]), (bbox_to_vis[obj_id][0]+bbox_to_vis[obj_id][2], bbox_to_vis[obj_id][1]+bbox_to_vis[obj_id][3]), color[(obj_id)%len(color)], 2)
-                
+
                 x1, y1, x2, y2 = prompts[frame_idx][0]
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 out.write(img)
