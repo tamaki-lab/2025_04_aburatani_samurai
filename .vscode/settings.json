@@ -41,6 +41,10 @@
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "cSpell.words": [
+        "argwhere",
+        "autocast",
+        "groundtruth",
+        "hiera",
         "lasot"
     ],
 }

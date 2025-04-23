@@ -10,4 +10,5 @@ disable =
     invalid-name,
     wrong-import-order,
     arguments-differ,
+    no-member,
 max-line-length = 160
