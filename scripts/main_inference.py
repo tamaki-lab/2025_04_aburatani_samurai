@@ -124,7 +124,7 @@ for vid, video in enumerate(test_videos):
             predictions.append(bbox_to_vis)
 
     os.makedirs(pred_folder, exist_ok=True)
-    with open(osp.join(pred_folder, f'{video_basename}.txt'), 'w') as f:
+    with open(osp.join(pred_folder, f'{video_basename}.txt'), 'w', encoding='utf-8') as f:
         for pred in predictions:
             x, y, w, h = pred[0]
             f.write(f"{x},{y},{w},{h}\n")
