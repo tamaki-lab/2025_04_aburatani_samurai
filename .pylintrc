@@ -10,5 +10,7 @@ disable =
     invalid-name,
     wrong-import-order,
     arguments-differ,
-    no-member,
 max-line-length = 160
+
+[TYPECHECK]
+generated-members=cv2.*,numpy.*
