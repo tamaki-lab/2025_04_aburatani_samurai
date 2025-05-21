@@ -28,7 +28,7 @@ color = [
     (255, 0, 0),
 ]
 
-testing_set = "data/LaSOT/testing_set.txt"
+testing_set = "data/LaSOT/person_testing_set.txt"
 with open(testing_set, 'r') as f:
     test_videos = f.readlines()
 
