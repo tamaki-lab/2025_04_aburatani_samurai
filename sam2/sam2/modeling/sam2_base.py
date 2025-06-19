@@ -484,7 +484,7 @@ class SAM2Base(torch.nn.Module):
                     sam_output_token = sam_output_tokens[batch_inds, best_iou_inds]
 
                 if False:
-                    # make all these on cpu                        
+                    # make all these on cpu
                     self.history[self.frame_cnt] = {
                         "kf_predicted_bbox": self.kf.xyah_to_xyxy(self.kf_mean[:4]),
                         # "multi_masks": high_res_multimasks.cpu(),
