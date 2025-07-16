@@ -7,6 +7,7 @@ Table for the 0.95 quantile of the chi-square distribution with N degrees of
 freedom (contains values for N=1, ..., 9). Taken from MATLAB/Octave's chi2inv
 function and used as Mahalanobis gating threshold.
 """
+# マハラノビス距離によるゲーティングの閾値（トラッキングで対応判定に使う）
 chi2inv95 = {
     1: 3.8415,
     2: 5.9915,
@@ -48,6 +49,7 @@ class KalmanFilter(object):
         # Motion and observation uncertainty are chosen relative to the current
         # state estimate. These weights control the amount of uncertainty in
         # the model. This is a bit hacky.
+        # 位置と速度ノイズを抑制（手抜きな設計）
         self._std_weight_position = 1. / 20
         self._std_weight_velocity = 1. / 160
 
