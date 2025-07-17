@@ -7,6 +7,7 @@ import os.path as osp
 import torch
 from sam2.build_sam import build_sam2_video_predictor  # pylint: disable=import-error, no-name-in-module
 # from tqdm import tqdm
+import datetime
 
 
 def load_lasot_gt(gt_path):
@@ -28,7 +29,7 @@ color = [
     (255, 0, 0),
 ]
 
-testing_set = "data/LaSOT/testing_set.txt"
+testing_set = "data/LaSOT/person_testing_set.txt"
 with open(testing_set, 'r') as f:
     test_videos = f.readlines()
 
@@ -42,11 +43,13 @@ else:
     model_cfg = f"configs/samurai/sam2.1_hiera_{model_name[0]}.yaml"
 
 video_folder = "data/LaSOT"
-pred_folder = f"results/{exp_name}/{exp_name}_{model_name}"
+# 現在の日付と時間を取得
+current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+pred_folder = f"results/{exp_name}/{exp_name}_{model_name}/{current_time}"
 
 save_to_video = True
 if save_to_video:
-    vis_folder = f"visualization/{exp_name}/{model_name}"
+    vis_folder = f"visualization/{exp_name}/{model_name}/{current_time}"
     os.makedirs(vis_folder, exist_ok=True)
     vis_mask = {}
     vis_bbox = {}
