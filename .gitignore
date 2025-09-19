@@ -123,6 +123,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.samuraienv
 env/
 venv/
 ENV/
@@ -164,7 +165,7 @@ visualization/*
 
 # For Testing
 demo/
+data/
 
 *.jpg
 *.mp4
-.samuraienv
