@@ -7,6 +7,7 @@ import os.path as osp
 import torch
 from sam2.build_sam import build_sam2_video_predictor  # pylint: disable=import-error, no-name-in-module
 # from tqdm import tqdm
+from typing import Dict, List, Tuple
 
 
 def id2color(tid: int):
@@ -17,14 +18,17 @@ def id2color(tid: int):
     return (b, g, r)  # OpenCVはBGR
 
 
-def load_mot_gt(gt_path):
+def load_mot_gt(gt_path: str) -> Tuple[
+    Dict[int, List[Tuple[Tuple[int, int, int, int], int]]],
+    List[Tuple[int, int, Tuple[int, int, int, int]]]
+]:
     """
     gt.txt: frame,id,x,y,w,h,conf,cls,vis を
     prompts[frame] = [ ((x1,y1,x2,y2), id), ... ] にまとめる.
     あわせて各idの初登場(最小frame)でのbboxを init_all に返す.
     zero_index=True のとき, frameを0始まりへシフト.
     """
-    prompts = {}         # frame(int) -> List[((x1,y1,x2,y2), id)]
+    prompts: Dict[int, List[Tuple[Tuple[int, int, int, int], int]]] = {}         # frame(int) -> List[((x1,y1,x2,y2), id)]
     first_appear = {}    # id -> (frame, (x1,y1,x2,y2))
 
     if not osp.exists(gt_path):
@@ -33,7 +37,8 @@ def load_mot_gt(gt_path):
     with open(gt_path, 'r') as f:
         for line in f:
             fr, tid, x, y, w, h, *_ = line.strip().split(',')
-            fr = int(fr); tid = int(tid)
+            fr = int(fr)
+            tid = int(tid)
             x1, y1, x2, y2 = int(x), int(y), int(x + w), int(y + h)
             fr0 = fr - 1
             prompts.setdefault(fr0, []).append(((x1, y1, x2, y2), tid))
@@ -59,7 +64,7 @@ with open(testing_set, 'r') as f:
     test_videos = f.readlines()
 
 exp_name = "samurai"
-model_name = "base_plus"
+model_name = "tiny"
 
 checkpoint = f"sam2/checkpoints/sam2.1_hiera_{model_name}.pt"
 if model_name == "base_plus":
