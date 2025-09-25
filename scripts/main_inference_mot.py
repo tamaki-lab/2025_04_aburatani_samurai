@@ -33,10 +33,10 @@ def load_mot_gt(gt_path):
     with open(gt_path, 'r') as f:
         for line in f:
             fr, tid, x, y, w, h, *_ = line.strip().split(',')
-            fr, tid = int(fr), int(tid)
+            fr = int(fr); tid = int(tid)
             x1, y1, x2, y2 = int(x), int(y), int(x + w), int(y + h)
             fr0 = fr - 1
-            prompts[fr0] = {(x1, y1, x2, y2), tid}
+            prompts.setdefault(fr0, []).append(((x1, y1, x2, y2), tid))
 
             if tid not in first_appear:
                 first_appear[tid] = (fr, (x1, y1, x2, y2))
@@ -133,8 +133,8 @@ for vid, video in enumerate(test_videos):
                 mot_rows.append((frame_idx + 1, obj_id, x, y, w, h, 1, -1, -1, -1))
 
             if save_to_video:
-
-                img = cv2.imread(f'{frame_folder}/{frame_idx + 1:08d}.jpg')
+                # 桁数6でゼロパディングされた画像ファイル名を想定
+                img = cv2.imread(f'{frame_folder}/{frame_idx + 1:06d}.jpg')
                 if img is None:
                     break
 
