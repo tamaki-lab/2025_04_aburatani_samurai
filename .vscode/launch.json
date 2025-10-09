@@ -14,6 +14,19 @@
             "justMyCode": false,
         },
         {
+            "name": "samurai mot sample",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "./scripts/main_inference_mot.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "0",
+                // "CUDA_LAUNCH_BLOCKING": "1",
+            },
+            "justMyCode": false,
+        },
+        {
             "name": "samurai sample",
             "type": "debugpy",
             "request": "launch",

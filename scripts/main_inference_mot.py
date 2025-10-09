@@ -8,6 +8,7 @@ import torch
 from sam2.build_sam import build_sam2_video_predictor  # pylint: disable=import-error, no-name-in-module
 # from tqdm import tqdm
 from typing import Dict, List, Tuple
+import csv
 
 
 def id2color(tid: int):
@@ -34,12 +35,21 @@ def load_mot_gt(gt_path: str) -> Tuple[
     if not osp.exists(gt_path):
         return {}, []  # GTなしの場合のフォールバック
 
-    with open(gt_path, 'r') as f:
-        for line in f:
-            fr, tid, x, y, w, h, *_ = line.strip().split(',')
-            fr = int(fr)
-            tid = int(tid)
-            x1, y1, x2, y2 = int(x), int(y), int(x + w), int(y + h)
+    with open(gt_path, newline='', encoding='utf-8') as f:
+        reader = csv.reader(f, delimiter=',')
+        for row in reader:
+            # 空行やコメント行スキップ
+            if not row or (row[0].strip().startswith('#')):
+                continue
+            # 列数は最低6列あればOK(以降は無視)
+            fr = int(float(row[0]))
+            tid = int(float(row[1]))
+            x = int(float(row[2]))
+            y = int(float(row[3]))
+            w = int(float(row[4]))
+            h = int(float(row[5]))
+
+            x1, y1, x2, y2 = x, y, x + w, y + h
             fr0 = fr - 1
             prompts.setdefault(fr0, []).append(((x1, y1, x2, y2), tid))
 
