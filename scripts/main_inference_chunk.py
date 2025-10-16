@@ -103,8 +103,8 @@ def inference_chunk(dataset_path, tracker_name, model_name, chunk_videos, result
                     bbox_to_vis[obj_id] = bbox
                     mask_to_vis[obj_id] = mask
 
-                predictions.append(bbox_to_vis)        
-            
+                predictions.append(bbox_to_vis)
+
         os.makedirs(result_folder, exist_ok=True)
         with open(osp.join(result_folder, f'{video_basename}.txt'), 'w') as f:
             for pred in predictions:
@@ -128,7 +128,7 @@ def main():
     parser.add_argument("--root_result_folder", type=str, default="results")
     args = parser.parse_args()
 
-    test_videos = load_test_video_list("data/LaSOT-ext/testing_set.txt")
+    test_videos = load_test_video_list("data/LaSOT/testing_set.txt")
     chunk_video_list = split_list(test_videos, args.num_chunks)
 
     chunk_videos = chunk_video_list[args.chunk_idx]
